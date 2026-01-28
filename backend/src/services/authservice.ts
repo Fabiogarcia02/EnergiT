@@ -1,31 +1,25 @@
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
 
-const prisma = new PrismaClient();
-const saltRounds = 10;
-
-// Função de cadastro de usuário
 export const registerUser = async (nome: string, email: string, senha: string) => {
-  // Verifica se o email já está cadastrado
-  const userExists = await prisma.users.findUnique({
-    where: { email },
+  const existingUser = await User.findOne({ where: { email } });
+  if (existingUser) throw new Error("Usuário já existe");
+
+  const hashedSenha = await bcrypt.hash(senha, 10);
+  return await User.create({ nome, email, senha: hashedSenha });
+};
+
+export const loginUser = async (email: string, senha: string) => {
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new Error("Usuário não encontrado");
+
+  const isMatch = await bcrypt.compare(senha, user.senha);
+  if (!isMatch) throw new Error("Senha incorreta");
+
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
+    expiresIn: "1h",
   });
 
-  if (userExists) {
-    throw new Error("Email já está em uso");
-  }
-
-  // Criptografa a senha
-  const hashedPassword = await bcrypt.hash(senha, saltRounds);
-
-  // Cria o novo usuário no banco de dados
-  const user = await prisma.users.create({
-    data: {
-      nome,
-      email,
-      senha_hash: hashedPassword,
-    },
-  });
-
-  return user;
+  return { token, user: { id: user.id, nome: user.nome, email: user.email } };
 };

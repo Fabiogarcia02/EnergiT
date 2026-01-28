@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
-    "target": "ES6", // Configuração para ES6
-    "module": "commonjs", // Use commonjs para Node.js
-    "outDir": "./dist", // Pasta de saída para os arquivos compilados
-    "rootDir": "./src", // Diretório de origem do código TypeScript
-    "esModuleInterop": true, // Para importar módulos de forma compatível com Node.js
-    "skipLibCheck": true, // Ignora a verificação das definições de tipos
-    "forceConsistentCasingInFileNames": true, // Garante que os nomes dos arquivos sejam consistentes
-    "strict": true, // Habilita todas as verificações estritas do TypeScript
-    "sourceMap": true, // Gera arquivos source map para depuração
-    "declaration": true, // Gera arquivos de declaração .d.ts
-    "declarationMap": true, // Gera arquivos de mapa de declaração
-    "noUncheckedIndexedAccess": true, // Aumenta a segurança de índices
-    "exactOptionalPropertyTypes": true // Garante a verificação de tipos opcionais exatos
+    "target": "ESNext", 
+    "module": "NodeNext", 
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
   },
-  "include": ["src/**/*.ts"], // Inclui todos os arquivos .ts na pasta src
-  "exclude": ["node_modules"] // Exclui a pasta node_modules
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }

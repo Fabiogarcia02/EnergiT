@@ -1,31 +1,33 @@
 import { Request, Response } from "express";
-import { registerUser, loginUser } from "../services/authService";
+import { registerUser, loginUser } from "../services/authservice.js";
 
-// Função para cadastro de usuário
 export const register = async (req: Request, res: Response) => {
   try {
     const { nome, email, senha } = req.body;
+    const user = await registerUser(nome, email, senha);
 
-    // Verifica se o email já está em uso
-    const userExists = await registerUser(nome, email, senha);
-
-    // Retorna o usuário cadastrado
     res.status(201).json({
       message: "Usuário cadastrado com sucesso",
-      user: userExists,
+      user,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const err = error as Error;
+    res.status(500).json({ message: err.message });
   }
 };
 
-// Função de login
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, senha } = req.body;
-    const token = await loginUser(email, senha);
-    res.status(200).json({ message: "Login realizado com sucesso", token });
+    const data = await loginUser(email, senha);
+    
+    res.status(200).json({ 
+      message: "Login realizado com sucesso", 
+      token: data.token,
+      user: data.user 
+    });
   } catch (error) {
-    res.status(401).json({ message: error.message });
+    const err = error as Error;
+    res.status(401).json({ message: err.message });
   }
 };

@@ -1,39 +1,25 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+import authRoutes from "../routes/rouresAuth.js"; 
+import sequelize from "../config/configdatabase.js";
 
+dotenv.config();
 const app = express();
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-// Rota básica de teste
-app.get("/", (req, res) => {
-  res.send("API rodando 🚀");
-});
+// Sincronização automática com o Banco de Dados
+// DICA: Se ainda der erro de "estrutura", mude alter: true para force: true uma única vez
+sequelize.sync({ force: true }) 
+  .then(() => console.log("✅ Banco resetado e tabelas criadas com sucesso!"))
+  .catch(err => console.error("❌ Erro ao conectar ao Postgres:", err));
 
-// --- ADICIONE ESTA ROTA AQUI ---
-app.post("/api/auth/login", (req, res) => {
-  const { email, senha } = req.body;
-
-  console.log("Tentativa de login:", email);
-
-  // Lógica simples de teste (Substitua por busca no banco de dados depois)
-  if (email === "teste@teste.com" && senha === "123456") {
-    return res.status(200).json({
-      message: "Login realizado!",
-      token: "token-gerado-pelo-backend-123", // Simulando um JWT
-      user: {
-        name: "Fábio",
-        email: email
-      }
-    });
-  }
-
-  // Se os dados estiverem errados
-  return res.status(401).json({ error: "E-mail ou senha inválidos" });
-});
+// Definição do prefixo das rotas
+app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 3333;
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
 });
