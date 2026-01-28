@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaHome, FaPlug, FaChartBar, FaCheckCircle } from 'react-icons/fa';
 import './Homepage.css';
-
+import '../../App.css';
 const Homepage = () => {
   return (
     <main className="homepage-container">
@@ -9,7 +9,7 @@ const Homepage = () => {
       <section className="hero">
         <div className="hero-content">
           <h1>Controle sua Energia,<br/><span>Economize o Planeta</span></h1>
-          <p>Com EcoWatts, você gerencia o consumo da sua casa em tempo real, economizando recursos e dinheiro.</p>
+          <p>Com EnergiT, você gerencia o consumo da sua casa em tempo real, economizando recursos e dinheiro.</p>
           <button className="btn-primary">Saiba Mais</button>
         </div>
         <div className="hero-image">

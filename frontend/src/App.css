@@ -8,3 +8,14 @@ body {
   padding: 0;
     box-sizing: border-box; 
 }
+/* No seu App.css ou index.css */
+.App {
+  background-color: #FFFFFF; /* Garante que o corpo do site seja branco */
+  color: #1A1A1A; /* Texto escuro para contraste */
+}
+
+/* Espaçamento interno padrão para as páginas dentro do Layout */
+main {
+  display: flex;
+  flex-direction: column;
+}

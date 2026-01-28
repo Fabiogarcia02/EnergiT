@@ -1,17 +1,16 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext"; // Importe o Contexto
-import './Login.css';
+import '../Login/Login.css'; // Usaremos o mesmo CSS para manter a consistência
 import '../../App.css';
-const Login = () => {
+const Signup = () => {
+  const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); // Puxa a função de login do contexto
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,48 +18,48 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:3333/api/auth/login", {
+      await axios.post("http://localhost:3333/api/auth/register", {
+        nome,
         email,
         senha,
       });
-
-      // 1. Salva os dados no Contexto (isso libera o ProtectedRoute)
-      // O backend geralmente retorna { token, user: { name, email... } }
-      login({
-        token: response.data.token,
-        name: response.data.user?.name || "Usuário",
-        email: email
-      });
-
-      alert("Login realizado com sucesso!");
-      
-      // 2. Redireciona para a Home ou Gerenciamento
-      navigate("/"); 
-      
+      alert("Usuário cadastrado com sucesso!");
+      navigate("/login"); // Redireciona para o login após cadastrar
     } catch (err: any) {
-      setError("Credenciais inválidas ou erro no servidor.");
+      setError("Erro ao cadastrar o usuário. Tente novamente.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page-wrapper">
+    <div className="login-page-wrapper signup-mode"> {/* signup-mode aplica o visual 'apagado' */}
       <div className="login-container">
         <div className="login-image">
-          <img src="/imgs/Sun%20energy-bro.png" alt="Sun energy" />
+          <img src="/imgs/Sun%20energy-bro.png" alt="Energy illustration" />
         </div>
 
         <div className="login-form-side">
-          <h2>Bem-vindo ao Ener<span>giT</span></h2>
-          <p>Gerencie sua energia de forma inteligente.</p>
+          <h2>Crie sua conta no Ener<span>giT</span></h2>
+          <p>Comece a monitorar sua economia hoje mesmo.</p>
 
           <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label>Nome Completo</label>
+              <input
+                type="text"
+                placeholder="Seu nome"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                required
+              />
+            </div>
+
             <div className="input-group">
               <label>Email</label>
               <input
                 type="email"
-                placeholder="Ex: seuemail@email.com"
+                placeholder="seu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -71,7 +70,7 @@ const Login = () => {
               <label>Senha</label>
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder="Mínimo 6 caracteres"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
@@ -81,12 +80,12 @@ const Login = () => {
             {error && <div className="error-message">{error}</div>}
 
             <button className="btn-login" type="submit" disabled={loading}>
-              {loading ? "Autenticando..." : "Entrar"}
+              {loading ? "Processando..." : "Cadastrar"}
             </button>
           </form>
 
           <p className="signup-link">
-            Não tem uma conta? <span onClick={() => navigate("/signup")}>Criar conta</span>
+            Já tem uma conta? <span onClick={() => navigate("/login")}>Fazer Login</span>
           </p>
         </div>
       </div>
@@ -94,4 +93,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
