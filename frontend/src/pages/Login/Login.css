@@ -1,0 +1,89 @@
+/* Estilo comum */
+.login-container {
+  width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease-in-out;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url("/imgs/Sun%20energy-bro.png");
+  background-size: cover;
+  background-position: center;
+  color: #333;
+  text-align: center;
+}
+
+/* Fundo amarelo quando está logado */
+.logged-in {
+  background-color: #ffcc00; /* Amarelo vibrante */
+}
+
+/* Fundo mais apagado para o cadastro */
+.register {
+  background-color: #f3e1a3; /* Amarelo mais suave */
+}
+
+/* Estilos dos campos */
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+input:focus, button:focus {
+  border-color: #ffcc00;
+  outline: none;
+}
+
+button {
+  background-color: #e7bd15;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #ffb300; /* Efeito de hover mais escuro */
+}
+
+button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+/* Estilo da imagem */
+.login-image img {
+  width: 100%;
+  max-width: 350px;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+/* Link de "Cadastrar" */
+.signup-link {
+  margin-top: 10px;
+  color: #ffcc00;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.signup-link:hover {
+  color: #ffb300;
+}
+
+/* Estilo da mensagem de erro */
+.error {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 10px;
+}

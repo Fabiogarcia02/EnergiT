@@ -1,0 +1,104 @@
+/* Variáveis de cor */
+:root {
+  --primary-yellow: #FFCC00;  /* Amarelo vibrante */
+  --dark-yellow: #FFB800;     /* Amarelo escuro para hover */
+  --text-dark: #333333;       /* Preto para textos */
+  --background-dark: #212121; /* Fundo preto */
+  --background-light: #F7F2C6; /* Amarelo claro */
+  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --font-family: 'Arial', sans-serif;
+}
+
+/* Estilo geral do cabeçalho */
+.header {
+  background-color: var(--background-dark);
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.header .logo h1 {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--primary-yellow);
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.header nav ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+}
+
+.header nav ul li {
+  margin-left: 30px;
+}
+
+.header nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.header nav ul li a:hover {
+  color: var(--primary-yellow);
+  transform: scale(1.05);
+}
+
+.header nav ul li a svg {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+/* Ícone de Perfil */
+.profile-icon {
+  background-color: var(--primary-yellow);
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.profile-icon:hover {
+  transform: scale(1.1);
+  background-color: var(--dark-yellow);
+}
+
+/* Responsividade */
+@media screen and (max-width: 768px) {
+  .header {
+    padding: 15px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header .logo h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .header nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 10px;
+  }
+
+  .header nav ul li {
+    margin-left: 0;
+    margin-bottom: 10px;
+  }
+
+  .profile-icon {
+    margin-top: 15px;
+  }
+}

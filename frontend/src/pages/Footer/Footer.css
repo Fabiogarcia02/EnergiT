@@ -1,0 +1,77 @@
+.footer {
+  background-color: #000000; /* Preto sólido */
+  color: #ffffff;
+  padding: 60px 10% 20px;
+  border-top: 4px solid var(--primary-yellow);
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-brand .logo-text {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.footer-brand .logo-text span {
+  color: var(--primary-yellow);
+}
+
+.footer-brand p {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.footer-nav h4, .social-links h4 {
+  color: var(--primary-yellow);
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-nav a {
+  color: #ccc;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.footer-nav a:hover {
+  color: var(--primary-yellow);
+  padding-left: 5px;
+}
+
+.social-links .icons {
+  display: flex;
+  gap: 20px;
+  font-size: 1.5rem;
+}
+
+.social-links .icons a {
+  color: #ffffff;
+  transition: 0.3s;
+}
+
+.social-links .icons a:hover {
+  color: var(--primary-yellow);
+  transform: translateY(-5px);
+}
+
+.footer-bottom {
+  border-top: 1px solid #333;
+  padding-top: 20px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #666;
+}
