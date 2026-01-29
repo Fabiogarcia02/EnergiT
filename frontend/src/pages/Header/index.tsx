@@ -1,7 +1,7 @@
     import React, { useState, useContext, useRef, useEffect } from 'react';
     import { FaHome, FaCog, FaChartBar, FaUserCircle, FaSignOutAlt, FaUserAlt } from 'react-icons/fa';
     import { useNavigate, Link } from 'react-router-dom';
-    import { AuthContext } from "../../context/AuthContext";
+    import { AuthContext } from "../../Context/AuthContext";
     import './Header.css';
 
     const Header = () => {
