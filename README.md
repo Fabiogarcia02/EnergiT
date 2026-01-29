@@ -11,26 +11,31 @@ Aqui estão as principais interfaces do EnergiT:
 ### 1. Acesso ao Sistema (Login e Cadastro)
 Notificações inteligentes e validação de dados garantem uma entrada segura com feedback visual via React Toastify.
 <div align="center">
-  <img src="./public/screenshots/login.png" width="400px" alt="Tela de Login">
-  <img src="./public/screenshots/cadastro.png" width="400px" alt="Tela de Cadastro">
+  <img width="1680" height="1010" alt="image" src="https://github.com/user-attachments/assets/c4ef5ed9-0e04-4a43-96cb-77c9c9c525e8" />
+
+ <img width="1459" height="967" alt="image" src="https://github.com/user-attachments/assets/060f4566-346d-492e-a1a8-557a525cef2e" />
+
 </div>
 
 ### 2. Painel de Gerenciamento
 Interface central para cadastro de cômodos e aparelhos, permitindo a personalização total do ambiente.
 <div align="center">
-  <img src="./public/screenshots/gerenciamento.png" width="800px" alt="Tela de Gerenciamento">
+<img width="1872" height="1225" alt="image" src="https://github.com/user-attachments/assets/70eb38b9-a305-4088-a238-54f90c896f20" />
+
 </div>
 
 ### 3. Painel de Estatísticas
 Visualização analítica dos dados de consumo, onde a mágica acontece com cálculos em tempo real baseados na tarifa da sua região (ANEEL 2024/2025).
 <div align="center">
-  <img src="./public/screenshots/estatisticas.png" width="800px" alt="Tela de Estatísticas">
+ <img width="2481" height="699" alt="image" src="https://github.com/user-attachments/assets/b31762e0-4dc9-4166-a96e-e7f61da146e5" />
+
 </div>
 
 ### 4. Perfil do Usuário
 Área dedicada à personalização de dados cadastrais e foto de perfil com preview dinâmico.
 <div align="center">
-  <img src="./public/screenshots/perfil.png" width="400px" alt="Tela de Perfil">
+ <img width="748" height="714" alt="image" src="https://github.com/user-attachments/assets/3e3add0d-d9b7-4380-86f5-1c9453eee7a8" />
+
 </div>
 
 ---
