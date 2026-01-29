@@ -1,37 +1,29 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
 
-// Carrega as variáveis do arquivo .env
 dotenv.config();
 
-// Validação de segurança: se a URL não existir, o sistema avisa antes de quebrar
+// Validação de segurança
 if (!process.env.DATABASE_URL) {
   console.error("❌ ERRO: A variável DATABASE_URL não foi encontrada no arquivo .env");
-  process.exit(1); // Para a execução do servidor
+  // Removi o process.exit(1) para evitar que o nodemon entre em loop infinito de erro
 }
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+const sequelize = new Sequelize(process.env.DATABASE_URL || '', {
   dialect: 'postgres',
-  logging: false, // Define como true se quiser ver o SQL no terminal
+  logging: false, 
   dialectOptions: {
-    // Caso use bancos na nuvem (como Render ou Supabase), pode precisar de SSL:
-    // ssl: {
-    //   require: true,
-    //   rejectUnauthorized: false
-    // }
+    // Se estiver usando Supabase/Render, descomente as linhas abaixo:
+    /*
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+    */
   }
 });
 
-// Função para testar a conexão imediatamente (opcional, mas ajuda muito)
-const testConnection = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('✅ Conexão com o banco de dados estabelecida com sucesso.');
-  } catch (error) {
-    console.error('❌ Não foi possível conectar ao banco de dados:', error);
-  }
-};
-
-testConnection();
+// Removi a chamada automática de testConnection() aqui para evitar 
+// que ela rode antes do Sequelize terminar de carregar os modelos no server.ts.
 
 export default sequelize;

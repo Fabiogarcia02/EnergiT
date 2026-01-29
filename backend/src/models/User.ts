@@ -1,14 +1,20 @@
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelize from '../config/configdatabase.js';
 
-class User extends Model {
-  public id!: number;
-  public nome!: string;
-  public email!: string;
-  public senha!: string;
+class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+  // CreationOptional indica que o campo pode ser omitido ao criar (pois o DB gera o ID)
+  declare id: CreationOptional<number>;
+  declare nome: string;
+  declare email: string;
+  declare senha: string;
 }
 
 User.init({
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
   nome: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -17,6 +23,9 @@ User.init({
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+    validate: {
+      isEmail: true, // Validação extra para garantir formato de e-mail
+    }
   },
   senha: { 
     type: DataTypes.STRING,
@@ -25,7 +34,8 @@ User.init({
 }, {
   sequelize,
   modelName: 'User',
-  tableName: 'users' // Força o nome da tabela como 'users'
+  tableName: 'users',
+  timestamps: true, // Adiciona createdAt e updatedAt automaticamente (opcional)
 });
 
 export default User;
