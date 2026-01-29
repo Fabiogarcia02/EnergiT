@@ -1,0 +1,108 @@
+            .dashboard-wrapper {
+            padding: 2rem;
+            background: #0f0f0f;
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            }
+
+            .dashboard-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            }
+
+            .dashboard-controls select {
+            background: #1a1a1a;
+            color: #f1c40f;
+            border: 1px solid #333;
+            padding: 0.8rem;
+            border-radius: 8px;
+            outline: none;
+            }
+
+            .dashboard-main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            }
+
+            .dash-card {
+            background: #161616;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid #222;
+            transition: transform 0.3s ease;
+            }
+
+            .card-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+            letter-spacing: 1px;
+            }
+
+            .meta-value-display {
+            margin: 1.5rem 0;
+            }
+
+            .meta-value-display strong {
+            font-size: 2.5rem;
+            color: #fff;
+            }
+
+            .meta-value-display small {
+            font-size: 1.2rem;
+            color: #555;
+            margin-left: 0.5rem;
+            }
+
+            .progress-container {
+            height: 10px;
+            background: #222;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            }
+
+            .progress-bar {
+            height: 100%;
+            background: #f1c40f;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .status-success { border-left: 5px solid #2ecc71; }
+            .status-danger { border-left: 5px solid #e74c3c; }
+            .status-danger .progress-bar { background: #e74c3c; }
+
+            .meta-edit-box {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            }
+
+            .meta-edit-box input {
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 5px;
+            width: 100px;
+            }
+
+            .edit-toggle {
+            background: none;
+            border: none;
+            color: #f1c40f;
+            cursor: pointer;
+            }
+
+            .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #f1c40f;
+            }

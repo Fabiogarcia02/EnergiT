@@ -1,158 +1,212 @@
-/* Variáveis de cor */
-:root {
-  --primary-yellow: #FFCC00;
-  --dark-yellow: #FFB800;
-  --text-dark: #333333;
-  --background-dark: #212121;
-  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  --border-radius: 8px;
-}
+    /* Variáveis atualizadas para tons mais modernos */
+    :root {
+      --primary-yellow: #f1c40f;
+      --dark-yellow: #d4ac0d;
+      --header-bg: rgba(15, 15, 15, 0.95); /* Leve transparência */
+      --accent-white: #ffffff;
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --shadow-premium: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
 
-/* Estilo geral do cabeçalho */
-.header {
-  background-color: var(--background-dark);
-  color: white;
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  position: relative;
-}
+    .header {
+      background-color: var(--header-bg);
+      backdrop-filter: blur(10px); /* Efeito de vidro borrado */
+      color: white;
+      padding: 0 5%;
+      height: 80px; /* Altura fixa para alinhar tudo perfeitamente */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-premium);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
 
-.header .logo h1 {
-  font-size: 28px;
-  font-weight: bold;
-  color: var(--primary-yellow);
-  letter-spacing: 2px;
-  margin: 0;
-}
+    /* LOGO */
+    .header .logo h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent-white);
+      letter-spacing: -1px;
+      margin: 0;
+      transition: transform 0.3s ease;
+    }
 
-.header .logo span {
-  color: white; /* O 'T' fica branco para destaque */
-}
+    .header .logo span {
+      color: var(--primary-yellow);
+    }
 
-.header nav ul {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
+    .header .logo:hover h1 {
+      transform: scale(1.05);
+    }
 
-.header nav ul li {
-  margin-left: 30px;
-}
+    /* NAVEGAÇÃO */
+    .header nav ul {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
 
-.header nav ul li a {
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
+    .header nav ul li {
+      margin: 0 15px;
+      position: relative;
+    }
 
-.header nav ul li a:hover {
-  color: var(--primary-yellow);
-}
+    .header nav ul li a {
+      color: #999;
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      height: 80px; /* Alinha o hover com a altura do header */
+      transition: all 0.3s ease;
+      gap: 8px;
+    }
 
-.header nav ul li a svg {
-  margin-right: 8px;
-}
+    /* Linha animada embaixo dos links */
+    .header nav ul li a::after {
+      content: '';
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary-yellow);
+      transition: width 0.3s ease;
+    }
 
-/* --- ESCRETO RETANGULAR DO USUÁRIO --- */
-.profile-container {
-  position: relative;
+    .header nav ul li a:hover {
+      color: var(--accent-white);
+    }
+
+    .header nav ul li a:hover::after {
+      width: 100%;
+    }
+
+    .header nav ul li a svg {
+      opacity: 0.7;
+      transition: transform 0.3s ease;
+    }
+
+    .header nav ul li a:hover svg {
+      opacity: 1;
+      transform: translateY(-2px);
+      color: var(--primary-yellow);
+    }
+
+    /* CONTAINER DO PERFIL */
+    .profile-box-rect {
+      background: rgba(241, 196, 15, 0.1); /* Fundo sutil */
+      color: var(--primary-yellow);
+      padding: 10px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(241, 196, 15, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .profile-box-rect:hover {
+      background: var(--primary-yellow);
+      color: #000;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(241, 196, 15, 0.3);
+    }
+
+    .user-name-header {
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+    }
+
+    /* MENU DROPDOWN (Design flutuante) */
+    .profile-dropdown {
+      position: absolute;
+      top: 75px;
+      right: 0;
+      background-color: #1a1a1a;
+      min-width: 200px;
+      border-radius: 14px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+      padding: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #ccc;
+      transition: all 0.2s;
+    }
+
+    .dropdown-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--primary-yellow);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.05);
+      margin: 8px 0;
+    }
+
+    .logout-item {
+      color: #ff6b6b;
+    }
+
+    .logout-item:hover {
+      background-color: rgba(255, 107, 107, 0.1) !important;
+      color: #ff6b6b !important;
+    }
+
+    /* RESPONSIVIDADE */
+    @media screen and (max-width: 768px) {
+      .header {
+        height: auto;
+        padding: 15px 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+      }
+      
+      .header nav ul li a {
+        height: 40px;
+      }
+      
+      .header nav ul li a::after {
+        display: none; /* Remove a linha no mobile para limpar o visual */
+      }
+    }
+
+    .header-avatar-img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--background-dark);
 }
 
 .profile-box-rect {
-  background-color: var(--primary-yellow);
-  color: var(--background-dark);
-  padding: 8px 16px;
-  border-radius: 6px; /* Retangular com cantos leves */
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.profile-box-rect:hover {
-  background-color: var(--dark-yellow);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
-}
-
-.user-name-header {
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-/* --- MENU DROPDOWN --- */
-.profile-dropdown {
-  position: absolute;
-  top: 55px;
-  right: 0;
-  background-color: #2c2c2c;
-  min-width: 180px;
-  border-radius: 6px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  z-index: 1000;
-  border: 1px solid #444;
-  animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  font-size: 14px;
-  color: white;
-  transition: all 0.2s;
-}
-
-.dropdown-item:hover {
-  background-color: var(--primary-yellow);
-  color: var(--background-dark);
-}
-
-.dropdown-divider {
-  height: 1px;
-  background-color: #444;
-}
-
-.logout-item {
-  color: #ff5555;
-}
-
-.logout-item:hover {
-  background-color: #ff5555 !important;
-  color: white !important;
-}
-
-/* Responsividade */
-@media screen and (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    padding: 20px;
-  }
-  .header nav ul {
-    margin: 20px 0;
-  }
-  .profile-dropdown {
-    right: 50%;
-    transform: translateX(50%);
-  }
+  /* Garante que o conteúdo não quebre se o nome for longo */
+  min-width: 120px; 
+  justify-content: space-between;
 }
