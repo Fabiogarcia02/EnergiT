@@ -4,7 +4,6 @@
     import sequelize from "../config/configdatabase.js";
 
     // Importando Serviços e Modelos
-    // ATENÇÃO: Verifique se o nome da pasta é "services" ou "Services". No Linux faz diferença.
     import * as AuthService from "../services/authservice.js";
     import User from "../models/User.js";
     import Aparelho from "../models/Aparelhos.js";
@@ -14,7 +13,8 @@
     dotenv.config();
     const app = express();
 
-    // --- CONFIGURAÇÃO DE CORS ---
+    // --- CONFIGURAÇÃO DE CORS REFORÇADA ---
+    // O middleware cors() já responde aos requests de OPTIONS (preflight) por padrão
     app.use(cors({
       origin: true, 
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -22,15 +22,11 @@
       allowedHeaders: ["Content-Type", "Authorization"]
     }));
 
-    // CORREÇÃO PARA EXPRESS 5: 
-    // O Express 5 exige (.*) para rotas curinga. O "*" sozinho causa erro de PathError.
-    app.options("(.*)", cors());
-
     app.use(express.json());
 
-    // Middleware de Log
+    // Log de monitoramento
     app.use((req, res, next) => {
-      console.log(`[${new Date().toLocaleString()}] Requisição: ${req.method} em ${req.url}`);
+      console.log(`[${new Date().toLocaleString()}] ${req.method} em ${req.url}`);
       next();
     });
 
@@ -43,16 +39,15 @@
     // --- ROTAS ---
 
     app.get("/api/debug", (req: Request, res: Response) => {
-      res.json({ status: "online", message: "✅ Backend EnergiT operacional!" });
+      res.json({ status: "online", message: "✅ Backend EnergiT rodando!" });
     });
 
     app.post("/api/auth/register", async (req: Request, res: Response) => {
       try {
         const { nome, email, senha } = req.body;
         const user = await AuthService.registerUser(nome, email, senha);
-        res.status(201).json({ message: "Usuário criado com sucesso!", userId: user.id });
+        res.status(201).json({ message: "Usuário criado!", userId: user.id });
       } catch (error: any) {
-        console.error("Erro no Registro:", error.message);
         res.status(400).json({ message: error.message });
       }
     });
@@ -63,7 +58,6 @@
         const data = await AuthService.loginUser(email, senha);
         res.json(data);
       } catch (error: any) {
-        console.error("Erro no Login:", error.message);
         res.status(401).json({ message: error.message });
       }
     });
@@ -99,7 +93,7 @@
             comodoId: mapaComodosIds[a.comodo]
           });
         }
-        res.status(201).json({ message: "Configuração salva com sucesso!" });
+        res.status(201).json({ message: "Configuração salva!" });
       } catch (error) {
         res.status(500).json({ error: "Erro ao salvar dados" });
       }
@@ -110,9 +104,7 @@
       .then(() => {
         const PORT = process.env.PORT || 3333;
         app.listen(Number(PORT), "0.0.0.0", () => {
-          console.log(`🚀 Servidor rodando na porta: ${PORT}`);
+          console.log(`🚀 Servidor pronto na porta: ${PORT}`);
         });
       })
-      .catch(err => {
-        console.error("❌ Falha crítica no banco:", err);
-      });
+      .catch(err => console.error("❌ Erro de banco:", err));
