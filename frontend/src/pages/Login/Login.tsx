@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext"; 
+import { AuthContext } from "../../Context/AuthContext"; 
 import { FaEye, FaEyeSlash } from "react-icons/fa"; 
 import './Login.css';
 import '../../App.css';

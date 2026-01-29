@@ -1,6 +1,6 @@
     import React, { useState, useContext, useRef } from 'react';
     import { FaCamera, FaSave, FaUser, FaEnvelope, FaIdCard } from 'react-icons/fa';
-    import { AuthContext } from '../../context/AuthContext';
+    import { AuthContext } from '../../Context/AuthContext';
     import './Perfil.css';
 
     const Perfil = () => {
