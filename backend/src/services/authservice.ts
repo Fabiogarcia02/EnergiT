@@ -1,25 +1,33 @@
-import User from "../models/User.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+    import User from "../models/User.js";
+    import bcrypt from "bcryptjs";
+    import jwt from "jsonwebtoken";
 
-export const registerUser = async (nome: string, email: string, senha: string) => {
-  const existingUser = await User.findOne({ where: { email } });
-  if (existingUser) throw new Error("Usuário já existe");
+    export const registerUser = async (nome: string, email: string, senha: string) => {
+      if (!nome || !email || !senha) throw new Error("Dados incompletos.");
+      
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) throw new Error("Este e-mail já está cadastrado.");
 
-  const hashedSenha = await bcrypt.hash(senha, 10);
-  return await User.create({ nome, email, senha: hashedSenha });
-};
+      const hashedSenha = await bcrypt.hash(senha, 10);
+      return await (User as any).create({ nome, email, senha: hashedSenha });
+    };
 
-export const loginUser = async (email: string, senha: string) => {
-  const user = await User.findOne({ where: { email } });
-  if (!user) throw new Error("Usuário não encontrado");
+    export const loginUser = async (email: string, senha: string) => {
+      const user: any = await User.findOne({ where: { email } });
+      if (!user) throw new Error("E-mail não encontrado.");
 
-  const isMatch = await bcrypt.compare(senha, user.senha);
-  if (!isMatch) throw new Error("Senha incorreta");
+      const isMatch = await bcrypt.compare(senha, user.senha);
+      if (!isMatch) throw new Error("Senha incorreta.");
 
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
-    expiresIn: "1h",
-  });
+   
+      const secret = process.env.JWT_SECRET || "chave_seguranca_energit_2026";
 
-  return { token, user: { id: user.id, nome: user.nome, email: user.email } };
-};
+      const token = jwt.sign({ id: user.id }, secret, {
+        expiresIn: "8h",
+      });
+
+      return { 
+        token, 
+        user: { id: user.id, nome: user.nome, email: user.email } 
+      };
+    };

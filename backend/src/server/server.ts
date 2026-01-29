@@ -1,11 +1,10 @@
     import express, { Request, Response } from "express";
     import cors from "cors";
     import dotenv from "dotenv";
-    import bcrypt from "bcryptjs";
-    import jwt from "jsonwebtoken";
     import sequelize from "../config/configdatabase.js";
 
-    // Importando modelos
+    // Importando Serviços e Modelos
+    import * as AuthService from "../services/authService.js";
     import User from "../models/User.js";
     import Aparelho from "../models/Aparelhos.js";
     import Locais from "../models/Locais.js";
@@ -14,81 +13,68 @@
     dotenv.config();
     const app = express();
 
-    // --- CONFIGURAÇÃO DE CORS (VERSÃO FINAL) ---
-    // Usar 'origin: true' faz com que o servidor aceite qualquer URL que venha da Vercel
+    // --- CONFIGURAÇÃO DE CORS (SOLUÇÃO PARA VERCEL + RENDER) ---
     app.use(cors({
-      origin: true, 
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-      credentials: true
+      origin: true, // Aceita dinamicamente a URL da sua Vercel
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      credentials: true,
+      allowedHeaders: ["Content-Type", "Authorization"]
     }));
+
+    // Responde ao "preflight" do navegador (Essencial para evitar erro de rede no POST)
+    app.options("*", cors());
 
     app.use(express.json());
 
-    // --- MIDDLEWARE DE LOG (Para você ver as tentativas de login no Render) ---
+    // Middleware de Log para monitorar as chamadas no Render
     app.use((req, res, next) => {
       console.log(`[${new Date().toLocaleString()}] Requisição: ${req.method} em ${req.url}`);
       next();
     });
 
-    // --- RELACIONAMENTOS DO BANCO ---
+    // --- CONFIGURAÇÃO DE RELACIONAMENTOS ---
     Locais.hasMany(Comodo, { as: 'comodos', foreignKey: 'imovelId' });
     Comodo.belongsTo(Locais, { foreignKey: 'imovelId' });
     Comodo.hasMany(Aparelho, { as: 'aparelhos', foreignKey: 'comodoId' });
     Aparelho.belongsTo(Comodo, { foreignKey: 'comodoId' });
 
-    // 1. ROTA DE DEBUG (O que você testou e deu certo)
+    // --- ROTAS DE AUTENTICAÇÃO ---
+
+    // Debug para testar se o servidor está vivo
     app.get("/api/debug", (req: Request, res: Response) => {
       res.json({ status: "online", message: "✅ Backend EnergiT conectado com sucesso!" });
     });
 
-    // 2. ROTA DE REGISTRO
+    // Registro de Usuário
     app.post("/api/auth/register", async (req: Request, res: Response) => {
       try {
         const { nome, email, senha } = req.body;
-        if (!nome || !email || !senha) return res.status(400).json({ message: "Dados incompletos!" });
-
-        const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) return res.status(400).json({ message: "Este e-mail já está em uso." });
-
-        const hashedSenha = await bcrypt.hash(senha, 10);
-        await User.create({ nome, email, senha: hashedSenha });
-        res.status(201).json({ message: "Usuário criado com sucesso!" });
+        const user = await AuthService.registerUser(nome, email, senha);
+        res.status(201).json({ message: "Usuário criado com sucesso!", userId: user.id });
       } catch (error: any) {
-        console.error("Erro no Registro:", error);
-        res.status(500).json({ message: "Erro ao criar conta." });
+        console.error("Erro no Registro:", error.message);
+        res.status(400).json({ message: error.message || "Erro ao registrar usuário." });
       }
     });
 
-    // 3. ROTA DE LOGIN
+    // Login de Usuário
     app.post("/api/auth/login", async (req: Request, res: Response) => {
       try {
         const { email, senha } = req.body;
-        const user: any = await User.findOne({ where: { email } });
-
-        if (!user || !(await bcrypt.compare(senha, user.senha))) {
-          return res.status(401).json({ message: "E-mail ou senha incorretos." });
-        }
-
-        const token = jwt.sign(
-          { id: user.id }, 
-          process.env.JWT_SECRET || "chave_padrao_energit_2026", 
-          { expiresIn: "8h" }
-        );
-
-        res.json({ 
-          token, 
-          user: { id: user.id, nome: user.nome, email: user.email } 
-        });
-      } catch (error) {
-        console.error("Erro no Login:", error);
-        res.status(500).json({ message: "Erro interno no servidor." });
+        const data = await AuthService.loginUser(email, senha);
+        res.json(data);
+      } catch (error: any) {
+        console.error("Erro no Login:", error.message);
+        res.status(401).json({ message: error.message || "Credenciais inválidas." });
       }
     });
 
-    // 4. ROTA DE SALVAMENTO (GERENCIAMENTO)
+    // --- ROTAS DE DADOS (GERENCIAMENTO) ---
+
     app.post("/api/gerenciamento", async (req: Request, res: Response) => {
       try {
         const { imovel, comodos, aparelhos } = req.body;
+        
         const novoImovel: any = await Locais.create({
           nome: imovel.nome,
           tipo: imovel.tipo,
@@ -117,22 +103,24 @@
             comodoId: mapaComodosIds[a.comodo]
           });
         }
-        res.status(201).json({ message: "Configuração salva!" });
+        res.status(201).json({ message: "Configuração salva com sucesso!" });
       } catch (error) {
-        res.status(500).json({ error: "Erro ao salvar dados." });
+        console.error("Erro ao salvar gerenciamento:", error);
+        res.status(500).json({ error: "Erro ao salvar dados" });
       }
     });
 
-    // --- INICIALIZAÇÃO ---
-    // O Render precisa que o servidor escute no host 0.0.0.0
+    // --- INICIALIZAÇÃO DO SERVIDOR ---
+
     sequelize.sync({ alter: true }) 
       .then(() => {
         console.log("✅ Banco Neon sincronizado!");
         const PORT = process.env.PORT || 3333;
+        
         app.listen(Number(PORT), "0.0.0.0", () => {
-          console.log(`🚀 Servidor rodando na porta: ${PORT}`);
+          console.log(`🚀 Servidor EnergiT rodando na porta: ${PORT}`);
         });
       })
       .catch(err => {
-        console.error("❌ Erro na conexão com o banco:", err);
+        console.error("❌ Falha crítica na conexão com o banco:", err);
       });
