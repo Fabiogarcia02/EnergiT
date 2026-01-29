@@ -4,6 +4,7 @@
     import sequelize from "../config/configdatabase.js";
 
     // Importando Serviços e Modelos
+    // ATENÇÃO: Verifique se o nome da pasta é "services" ou "Services". No Linux faz diferença.
     import * as AuthService from "../services/authservice.js";
     import User from "../models/User.js";
     import Aparelho from "../models/Aparelhos.js";
@@ -13,39 +14,38 @@
     dotenv.config();
     const app = express();
 
-    // --- CONFIGURAÇÃO DE CORS (SOLUÇÃO PARA VERCEL + RENDER) ---
+    // --- CONFIGURAÇÃO DE CORS ---
     app.use(cors({
-      origin: true, // Aceita dinamicamente a URL da sua Vercel
+      origin: true, 
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"]
     }));
 
-    // Responde ao "preflight" do navegador (Essencial para evitar erro de rede no POST)
-    app.options("*", cors());
+    // CORREÇÃO PARA EXPRESS 5: 
+    // O Express 5 exige (.*) para rotas curinga. O "*" sozinho causa erro de PathError.
+    app.options("(.*)", cors());
 
     app.use(express.json());
 
-    // Middleware de Log para monitorar as chamadas no Render
+    // Middleware de Log
     app.use((req, res, next) => {
       console.log(`[${new Date().toLocaleString()}] Requisição: ${req.method} em ${req.url}`);
       next();
     });
 
-    // --- CONFIGURAÇÃO DE RELACIONAMENTOS ---
+    // --- RELACIONAMENTOS ---
     Locais.hasMany(Comodo, { as: 'comodos', foreignKey: 'imovelId' });
     Comodo.belongsTo(Locais, { foreignKey: 'imovelId' });
     Comodo.hasMany(Aparelho, { as: 'aparelhos', foreignKey: 'comodoId' });
     Aparelho.belongsTo(Comodo, { foreignKey: 'comodoId' });
 
-    // --- ROTAS DE AUTENTICAÇÃO ---
+    // --- ROTAS ---
 
-    // Debug para testar se o servidor está vivo
     app.get("/api/debug", (req: Request, res: Response) => {
-      res.json({ status: "online", message: "✅ Backend EnergiT conectado com sucesso!" });
+      res.json({ status: "online", message: "✅ Backend EnergiT operacional!" });
     });
 
-    // Registro de Usuário
     app.post("/api/auth/register", async (req: Request, res: Response) => {
       try {
         const { nome, email, senha } = req.body;
@@ -53,11 +53,10 @@
         res.status(201).json({ message: "Usuário criado com sucesso!", userId: user.id });
       } catch (error: any) {
         console.error("Erro no Registro:", error.message);
-        res.status(400).json({ message: error.message || "Erro ao registrar usuário." });
+        res.status(400).json({ message: error.message });
       }
     });
 
-    // Login de Usuário
     app.post("/api/auth/login", async (req: Request, res: Response) => {
       try {
         const { email, senha } = req.body;
@@ -65,16 +64,13 @@
         res.json(data);
       } catch (error: any) {
         console.error("Erro no Login:", error.message);
-        res.status(401).json({ message: error.message || "Credenciais inválidas." });
+        res.status(401).json({ message: error.message });
       }
     });
-
-    // --- ROTAS DE DADOS (GERENCIAMENTO) ---
 
     app.post("/api/gerenciamento", async (req: Request, res: Response) => {
       try {
         const { imovel, comodos, aparelhos } = req.body;
-        
         const novoImovel: any = await Locais.create({
           nome: imovel.nome,
           tipo: imovel.tipo,
@@ -105,22 +101,18 @@
         }
         res.status(201).json({ message: "Configuração salva com sucesso!" });
       } catch (error) {
-        console.error("Erro ao salvar gerenciamento:", error);
         res.status(500).json({ error: "Erro ao salvar dados" });
       }
     });
 
-    // --- INICIALIZAÇÃO DO SERVIDOR ---
-
+    // --- INICIALIZAÇÃO ---
     sequelize.sync({ alter: true }) 
       .then(() => {
-        console.log("✅ Banco Neon sincronizado!");
         const PORT = process.env.PORT || 3333;
-        
         app.listen(Number(PORT), "0.0.0.0", () => {
-          console.log(`🚀 Servidor EnergiT rodando na porta: ${PORT}`);
+          console.log(`🚀 Servidor rodando na porta: ${PORT}`);
         });
       })
       .catch(err => {
-        console.error("❌ Falha crítica na conexão com o banco:", err);
+        console.error("❌ Falha crítica no banco:", err);
       });
