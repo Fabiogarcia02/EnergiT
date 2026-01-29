@@ -14,18 +14,27 @@
     dotenv.config();
     const app = express();
 
-    app.use(cors());
+    // --- CONFIGURAÇÃO DE CORS PARA PRODUÇÃO ---
+    app.use(cors({
+      origin: [
+        "http://localhost:5173", 
+        "https://energi-t-awz1.vercel.app" 
+      ],
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      credentials: true
+    }));
+
     app.use(express.json());
 
-    // --- CONFIGURAÇÃO DE RELACIONAMENTOS (Dashboard) ---
+    // --- CONFIGURAÇÃO DE RELACIONAMENTOS ---
     Locais.hasMany(Comodo, { as: 'comodos', foreignKey: 'imovelId' });
     Comodo.belongsTo(Locais, { foreignKey: 'imovelId' });
     Comodo.hasMany(Aparelho, { as: 'aparelhos', foreignKey: 'comodoId' });
     Aparelho.belongsTo(Comodo, { foreignKey: 'comodoId' });
 
-    // 1.  DEBUG
+    // 1. DEBUG
     app.get("/api/debug", (req, res) => {
-      res.send("✅ SERVIDOR ATUALIZADO: Rota de Dashboard e Metas prontas!");
+      res.send("✅ SERVIDOR ONLINE: Backend conectado com sucesso!");
     });
 
     // 2. ROTA DE REGISTRO
@@ -65,12 +74,11 @@
       try {
         const { imovel, comodos, aparelhos } = req.body;
         
-        // Cria o imóvel 
         const novoImovel = await Locais.create({
           nome: imovel.nome,
           tipo: imovel.tipo,
           estado: imovel.estado,
-          meta_kwh: imovel.meta_kwh || 0 // Campo para o seu Dashboard
+          meta_kwh: imovel.meta_kwh || 0 
         });
 
         const mapaComodosIds: Record<string, number> = {};
@@ -101,7 +109,7 @@
       }
     });
 
-    // 5.BUSCA PARA DASHBOARD 
+    // 5. BUSCA PARA DASHBOARD 
     app.get("/api/dashboard/dados", async (req, res) => {
       try {
         const dados = await Locais.findAll({
@@ -117,7 +125,7 @@
       }
     });
 
-    // 6.  ATUALIZAR META DE UM APARTAMENTO
+    // 6. ATUALIZAR META
     app.patch("/api/locais/:id/meta", async (req, res) => {
       try {
         const { id } = req.params;
@@ -129,13 +137,17 @@
       }
     });
 
-    // Inicialização
+    // --- INICIALIZAÇÃO COM PORTA DINÂMICA ---
+    // Mude para 'false' após o primeiro deploy bem-sucedido
     sequelize.sync({ alter: true }) 
       .then(() => {
-        console.log("✅ Banco sincronizado e tabelas atualizadas!");
+        console.log("✅ Banco sincronizado!");
         const PORT = process.env.PORT || 3333;
-        app.listen(PORT, "0.0.0.0", () => {
-          console.log(`🚀 Servidor rodando em: http://127.0.0.1:${PORT}`);
+        // Escutar em 0.0.0.0 é obrigatório para o Render
+        app.listen(Number(PORT), "0.0.0.0", () => {
+          console.log(`🚀 Servidor rodando na porta: ${PORT}`);
         });
       })
-      .catch(err => console.error("❌ Falha na conexão:", err));
+      .catch(err => {
+        console.error("❌ Falha na conexão com o banco Neon:", err);
+      });
