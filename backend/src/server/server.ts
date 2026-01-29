@@ -4,7 +4,7 @@
     import sequelize from "../config/configdatabase.js";
 
     // Importando Serviços e Modelos
-    import * as AuthService from "../services/authService.js";
+    import * as AuthService from "../services/authservice.js";
     import User from "../models/User.js";
     import Aparelho from "../models/Aparelhos.js";
     import Locais from "../models/Locais.js";
