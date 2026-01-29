@@ -1,9 +1,26 @@
-    import React, { createContext, useState, useEffect } from 'react';
+    import { createContext, useState, useEffect, ReactNode } from 'react';
 
-    export const AuthContext = createContext();
+    // Definindo o que tem dentro do usuário
+    interface User {
+      name: string;
+      email: string;
+      avatarUrl?: string | null;
+      isLogged?: boolean;
+    }
 
-    export const AuthProvider = ({ children }) => {
-      const [user, setUser] = useState(null);
+    // Definindo o que o Contexto oferece para os outros componentes
+    interface AuthContextType {
+      user: User | null;
+      login: (userData: User) => void;
+      logout: () => void;
+      updateUser: (newData: Partial<User>) => void;
+      loading: boolean;
+    }
+
+    export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+    export const AuthProvider = ({ children }: { children: ReactNode }) => {
+      const [user, setUser] = useState<User | null>(null);
       const [loading, setLoading] = useState(true);
 
       useEffect(() => {
@@ -14,7 +31,7 @@
         setLoading(false);
       }, []);
 
-      const login = (userData) => {
+      const login = (userData: User) => {
         const userWithStatus = { ...userData, isLogged: true };
         setUser(userWithStatus);
         localStorage.setItem("ecoWatts_user", JSON.stringify(userWithStatus));
@@ -25,9 +42,9 @@
         localStorage.removeItem("ecoWatts_user");
       };
 
-      // Atualiza nome, email ou foto no estado e no localStorage
-      const updateUser = (newData) => {
+      const updateUser = (newData: Partial<User>) => {
         setUser((prev) => {
+          if (!prev) return null;
           const updated = { ...prev, ...newData };
           localStorage.setItem("ecoWatts_user", JSON.stringify(updated));
           return updated;

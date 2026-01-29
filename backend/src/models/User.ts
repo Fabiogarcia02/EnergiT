@@ -2,7 +2,7 @@ import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOpt
 import sequelize from '../config/configdatabase.js';
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
-  // CreationOptional indica que o campo pode ser omitido ao criar (pois o DB gera o ID)
+ 
   declare id: CreationOptional<number>;
   declare nome: string;
   declare email: string;
@@ -24,7 +24,7 @@ User.init({
     allowNull: false,
     unique: true,
     validate: {
-      isEmail: true, // Validação extra para garantir formato de e-mail
+      isEmail: true, 
     }
   },
   senha: { 
@@ -35,7 +35,7 @@ User.init({
   sequelize,
   modelName: 'User',
   tableName: 'users',
-  timestamps: true, // Adiciona createdAt e updatedAt automaticamente (opcional)
+  timestamps: true, 
 });
 
 export default User;

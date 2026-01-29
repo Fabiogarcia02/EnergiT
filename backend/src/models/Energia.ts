@@ -20,7 +20,7 @@ EnergyBill.init({
   tableName: 'energy_bills' 
 });
 
-// ✅ CORREÇÃO: Usando 'Locais' (o nome que você importou lá em cima)
+
 Locais.hasMany(EnergyBill, { foreignKey: 'locationId' });
 EnergyBill.belongsTo(Locais, { foreignKey: 'locationId' });
 

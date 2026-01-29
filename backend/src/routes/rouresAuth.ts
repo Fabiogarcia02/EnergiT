@@ -16,7 +16,7 @@ import Aparelho from "../models/Aparelhos.js";
 dotenv.config();
 const app = express();
 
-// Middlewares essenciais
+
 app.use(cors());
 app.use(express.json());
 app.get("/debug", (req, res) => res.send("O servidor novo está online!"));
@@ -118,7 +118,7 @@ app.post("/api/gerenciamento", async (req, res) => {
   }
 });
 
-// 5. Inicialização e Sincronização
+
 sequelize.sync({ alter: true }) 
   .then(() => console.log("✅ Banco de dados pronto!"))
   .catch(err => console.error("❌ Erro no Banco:", err));
