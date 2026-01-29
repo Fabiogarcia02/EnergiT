@@ -5,7 +5,7 @@ import '../../App.css';
 const Homepage = () => {
   return (
     <main className="homepage-container">
-      {/* HERO SECTION: Texto + Imagem da Casa */}
+  
       <section className="hero">
         <div className="hero-content">
           <h1>Controle sua Energia,<br/><span>Economize o Planeta</span></h1>
@@ -13,7 +13,7 @@ const Homepage = () => {
           <button className="btn-primary">Saiba Mais</button>
         </div>
         <div className="hero-image">
-          {/* Use a imagem da casa que você gerou aqui */}
+        
           <img src="/imgs/undraw_best-place_dhzp.svg" alt="Smart Home " />
         </div>
       </section>
@@ -37,7 +37,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* HOW IT WORKS: Seção limpa com ilustrações unDraw */}
+  
       <section className="how-it-works">
         <div className="info-block">
             <img src="/imgs/undraw_electricity_iu6d.svg" alt="Processo" className="side-img" />

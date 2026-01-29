@@ -2,6 +2,7 @@
     import axios from "axios";
     import { useNavigate } from "react-router-dom";
     import { FaEye, FaEyeSlash } from "react-icons/fa"; 
+    import { toast } from "react-toastify"; // Importação do toast
     import '../Login/Login.css'; 
     import '../../App.css';
 
@@ -10,25 +11,22 @@
       const [email, setEmail] = useState("");
       const [senha, setSenha] = useState("");
       const [showPassword, setShowPassword] = useState(false);
-      const [error, setError] = useState<string | null>(null);
       const [loading, setLoading] = useState(false);
 
       const navigate = useNavigate();
 
-   
       const API_URL = import.meta.env.VITE_API_URL || "https://energit-1.onrender.com";
 
-      
       const validateForm = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-          setError("Por favor, insira um e-mail válido (ex: seu@email.com).");
+          toast.error("Por favor, insira um e-mail válido.");
           return false;
         }
 
         const senhaRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         if (!senhaRegex.test(senha)) {
-          setError("A senha deve ter pelo menos 8 caracteres, incluir uma letra maiúscula, uma minúscula e um número.");
+          toast.error("A senha deve ter 8+ caracteres, com maiúscula, minúscula e número.");
           return false;
         }
 
@@ -37,25 +35,41 @@
 
       const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
 
         if (!validateForm()) return;
 
         setLoading(true);
+        const idToast = toast.loading("Criando sua conta..."); // Toast de carregamento
+
         try {
-      
           await axios.post(`${API_URL}/api/auth/register`, {
             nome,
             email,
             senha,
           });
 
-          alert("✅ Usuário cadastrado com sucesso!");
-          navigate("/login"); 
+          // Sucesso
+          toast.update(idToast, { 
+            render: "✅ Conta criada com sucesso! Redirecionando...", 
+            type: "success", 
+            isLoading: false, 
+            autoClose: 2000 
+          });
+
+          // Pequeno delay para o usuário ler a mensagem de sucesso
+          setTimeout(() => navigate("/login"), 2000);
+
         } catch (err: any) {
           console.error("Erro no cadastro:", err);
           const message = err.response?.data?.message || "Erro ao conectar com o servidor.";
-          setError(message);
+          
+          // Erro
+          toast.update(idToast, { 
+            render: message, 
+            type: "error", 
+            isLoading: false, 
+            autoClose: 4000 
+          });
         } finally {
           setLoading(false);
         }
@@ -124,19 +138,8 @@
                   </div>
                 </div>
 
-                {error && (
-                  <div className="error-message-box" style={{ 
-                    color: '#ff4d4d', 
-                    fontSize: '13px', 
-                    marginTop: '10px',
-                    textAlign: 'center' 
-                  }}>
-                    {error}
-                  </div>
-                )}
-
                 <button className="btn-login" type="submit" disabled={loading}>
-                  {loading ? "Processando..." : "Finalizar Cadastro"}
+                  {loading ? "Criando conta..." : "Finalizar Cadastro"}
                 </button>
               </form>
 

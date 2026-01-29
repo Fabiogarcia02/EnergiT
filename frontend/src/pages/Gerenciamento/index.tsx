@@ -4,10 +4,11 @@
       FaBed, FaBath, FaUtensils, FaCouch, FaLightbulb, FaSnowflake, 
       FaLaptop, FaChargingStation, FaSearch 
     } from 'react-icons/fa';
+    import { toast } from 'react-toastify'; 
     import './Gerenciamento.css';
 
     const Gerenciamento = () => {
-      // Tarifas ANEEL 2024/2025
+    
       const tarifasPorEstado: Record<string, number> = {
         'AC': 0.82, 'AL': 0.75, 'AP': 0.78, 'AM': 0.83, 'BA': 0.81, 'CE': 0.79, 'DF': 0.76, 
         'ES': 0.72, 'GO': 0.74, 'MA': 0.77, 'MT': 0.85, 'MS': 0.88, 'MG': 0.86, 'PA': 0.92, 
@@ -32,7 +33,9 @@
         { id: 'FaChargingStation', icon: <FaChargingStation /> }
       ];
 
-      // ESTADOS
+     
+      const API_URL = import.meta.env.VITE_API_URL || "https://energit-1.onrender.com";
+
       const [listaImoveis, setListaImoveis] = useState<any[]>([]);
       const [imovelIdAtivo, setImovelIdAtivo] = useState<string | null>(null);
       const [local, setLocal] = useState({ nome: '', tipo: 'Casa', estado: 'MG' });
@@ -47,7 +50,6 @@
         naTomada: false, tempoStandby: '12', icone: 'FaPlug'
       });
 
-      // FUNÇÕES DE APOIO
       const renderIcon = (id: string, list: any[]) => list.find(item => item.id === id)?.icon || <FaPlug />;
       const tarifaAtual = tarifasPorEstado[local.estado] || 0.80;
 
@@ -55,7 +57,7 @@
 
       const fetchImoveis = async () => {
         try {
-          const res = await fetch('http://127.0.0.1:3333/api/dashboard/dados');
+          const res = await fetch(`${API_URL}/api/dashboard/dados`);
           const data = await res.json();
           setListaImoveis(data);
         } catch (err) { console.error("Erro ao buscar lista:", err); }
@@ -67,6 +69,7 @@
           setLocal({ nome: '', tipo: 'Casa', estado: 'MG' });
           setComodos([]);
           setAparelhos([]);
+          toast.info("Modo: Novo Local");
           return;
         }
         const imovel = listaImoveis.find(i => i.id.toString() === id);
@@ -82,19 +85,24 @@
             }))
           );
           setAparelhos(aps);
+          toast.success(`Carregado: ${imovel.nome}`);
         }
       };
 
       const addComodo = () => {
-        if (!nomeComodo.trim()) return;
+        if (!nomeComodo.trim()) return toast.warning("Dê um nome ao cômodo.");
         setComodos([...comodos, { id: Date.now(), nome: nomeComodo, icone: iconeComodoSel }]);
         setNomeComodo("");
+        toast.success("Cômodo adicionado!");
       };
 
       const addAparelho = () => {
-        if (!novoAparelho.nome || !novoAparelho.comodo || !novoAparelho.potencia) return alert("Preencha Watts e Cômodo!");
+        if (!novoAparelho.nome || !novoAparelho.comodo || !novoAparelho.potencia) {
+            return toast.error("Preencha Watts, Nome e Cômodo!");
+        }
         setAparelhos([...aparelhos, { ...novoAparelho, id: Date.now() }]);
         setNovoAparelho({ ...novoAparelho, nome: '', potencia: '', tempoAtivo: '', naTomada: false, tempoStandby: '12', icone: 'FaPlug' });
+        toast.success("Aparelho adicionado à lista!");
       };
 
       const totaisGerais = useMemo(() => {
@@ -103,7 +111,7 @@
           const pAtiva = Number(a.potencia);
           const hAtivo = Number(a.tempoAtivo);
           const hStandby = a.naTomada ? Number(a.tempoStandby) : 0;
-          const pStandby = pAtiva * 0.02; // Estimativa standby 2%
+          const pStandby = pAtiva * 0.02; 
           const consumoDiaKwh = ((pAtiva * hAtivo) + (pStandby * hStandby)) / 1000;
           kwhMesTotal += consumoDiaKwh * 30;
         });
@@ -114,20 +122,41 @@
       }, [aparelhos, tarifaAtual]);
 
       const salvarNoBackend = async () => {
-        if (!local.nome || comodos.length === 0) return alert("⚠️ Informe o nome e ao menos um cômodo.");
+        if (!local.nome || comodos.length === 0) {
+            return toast.warning("⚠️ Informe o nome do local e adicione ao menos um cômodo.");
+        }
+
         setLoading(true);
+        const idToast = toast.loading("Sincronizando com o servidor...");
+
         try {
-          await fetch('http://127.0.0.1:3333/api/gerenciamento', {
+          const response = await fetch(`${API_URL}/api/gerenciamento`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ imovel: local, comodos, aparelhos }),
           });
-          alert('✅ Configurações salvas!');
+
+          if (!response.ok) throw new Error("Falha ao salvar");
+
+          toast.update(idToast, { 
+            render: '✅ Configurações salvas com sucesso!', 
+            type: "success", 
+            isLoading: false, 
+            autoClose: 3000 
+          });
           fetchImoveis();
-        } catch (e) { alert('❌ Erro de conexão.'); }
+        } catch (e) { 
+            toast.update(idToast, { 
+                render: '❌ Erro ao salvar dados. Verifique a conexão.', 
+                type: "error", 
+                isLoading: false, 
+                autoClose: 3000 
+            });
+        }
         finally { setLoading(false); }
       };
 
+     
       return (
         <div className="gerenciamento-wrapper">
           <header className="page-header">
@@ -140,7 +169,7 @@
               </select>
             </div>
           </header>
-
+        
           <div className="dashboard-resumo">
             <div className="resumo-card">
               <label className="text-white-label">Consumo Mensal Estimado</label>
