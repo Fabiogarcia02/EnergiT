@@ -1,11 +1,13 @@
 {
   "name": "energit",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend EnergiT - Gerenciamento de Energia",
   "type": "module",
-  "main": "index.js",
+  "main": "src/server/server.ts",
   "scripts": {
- "dev": "tsx watch src/server/server.ts"
+    "dev": "tsx watch src/server/server.ts",
+    "start": "tsx src/server/server.ts",
+    "build": "npm install"
   },
   "keywords": [],
   "author": "",
