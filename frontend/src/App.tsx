@@ -8,8 +8,8 @@
       import Gerenciamento from "./pages/Gerenciamento/";
       import Estatisticas from "./pages/Estatisticas/";
       import Perfil from "./pages/Perfil/"; // 1. Importação da nova página
-      import ProtectedRoute from "./components/ProtectedRoute";
-      import { AuthProvider } from "./context/AuthContext";
+      import ProtectedRoute from "./Components/ProtectedRoute";
+      import { AuthProvider } from "./Context/AuthContext";
 
       const App = () => {
         return (
