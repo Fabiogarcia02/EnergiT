@@ -71,3 +71,85 @@ body { background-color: var(--bg-deep); margin: 0; font-family: 'Inter', sans-s
 /* Animação */
 .fade-in { animation: fadeIn 0.3s ease-in; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* Área do botão de salvamento */
+.save-action-area {
+  margin-top: 40px;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Estilo do Botão Salvar Final */
+.btn-save-final {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-save-final svg {
+  font-size: 1.3rem;
+}
+
+/* Efeito de Hover (Passar o mouse) */
+.btn-save-final:hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(39, 174, 96, 0.4);
+  filter: brightness(1.1);
+}
+
+/* Efeito de Clique */
+.btn-save-final:active:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(39, 174, 96, 0.2);
+}
+
+/* Estado de Carregamento ou Desabilitado */
+.btn-save-final:disabled {
+  background: #555;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+  display: flex;
+  justify-content: center;
+  min-width: 200px;
+}
+
+/* Pequena animação de pulso para o 'Salvando...' */
+@keyframes pulse-save {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.btn-save-final:disabled {
+  animation: pulse-save 1.5s infinite ease-in-out;
+}
+.error-message-box {
+  color: #ff4d4d;
+  font-size: 13px;
+  background-color: rgba(255, 77, 77, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 77, 77, 0.2);
+  margin-bottom: 15px;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.password-field input:focus {
+  border-color: #f1c40f;
+}

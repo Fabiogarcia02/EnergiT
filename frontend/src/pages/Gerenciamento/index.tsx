@@ -15,12 +15,11 @@ const Gerenciamento = () => {
     'RO': 0.79, 'RR': 0.80, 'SC': 0.69, 'SP': 0.84, 'SE': 0.75, 'TO': 0.80
   };
 
-  // Estados dos Dados
   const [local, setLocal] = useState({ nome: '', tipo: 'Casa', estado: 'MG' });
   const [comodos, setComodos] = useState<any[]>([]);
   const [aparelhos, setAparelhos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   
-  // Estados dos Formulários
   const [nomeComodo, setNomeComodo] = useState("");
   const [iconeComodoSel, setIconeComodoSel] = useState("FaDoorOpen");
   const [novoAparelho, setNovoAparelho] = useState({
@@ -47,14 +46,13 @@ const Gerenciamento = () => {
 
   const tarifaAtual = tarifasPorEstado[local.estado] || 0.80;
 
-  // Cálculo de Totais
   const totaisGerais = useMemo(() => {
     let kwhMesTotal = 0;
     aparelhos.forEach(a => {
       const pAtiva = Number(a.potencia);
       const hAtivo = Number(a.tempoAtivo);
       const hStandby = a.naTomada ? Number(a.tempoStandby) : 0;
-      const pStandby = pAtiva * 0.02; // Estimação de 2% para standby
+      const pStandby = pAtiva * 0.02;
       const consumoDiaKwh = ((pAtiva * hAtivo) + (pStandby * hStandby)) / 1000;
       kwhMesTotal += consumoDiaKwh * 30;
     });
@@ -64,46 +62,63 @@ const Gerenciamento = () => {
     };
   }, [aparelhos, tarifaAtual]);
 
-
- // --- FUNÇÃO DE SALVAR ---
+  // --- FUNÇÃO DE SALVAMENTO ROBUSTA ---
   const salvarNoBackend = async () => {
+    if (!local.nome || comodos.length === 0) {
+      alert("⚠️ Preencha o nome do local e adicione ao menos um cômodo.");
+      return;
+    }
+
+    setLoading(true);
+
     const dadosParaSalvar = {
       imovel: local,
-      comodos: comodos,
-      aparelhos: aparelhos,
-      consumoTotalKwh: totaisGerais.kwh,
-      custoTotalEstimado: totaisGerais.custo
+      comodos: comodos.map(c => ({ nome: c.nome, icone: c.icone })),
+      aparelhos: aparelhos.map(a => ({
+        nome: a.nome,
+        potencia: Number(a.potencia),
+        comodo: a.comodo,
+        tempoAtivo: Number(a.tempoAtivo),
+        naTomada: a.naTomada,
+        tempoStandby: Number(a.tempoStandby) || 0,
+        icone: a.icone
+      }))
     };
 
     try {
-      // Removida a vírgula extra que causava o erro de sintaxe
-      const response = await fetch('http://localhost:3333/api/gerenciamento', {
+      // Forçando o IP 127.0.0.1 para garantir que o Windows encontre o Node.js
+      const response = await fetch('http://127.0.0.1:3333/api/gerenciamento', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dadosParaSalvar),
       });
 
       if (response.ok) {
-        alert('✅ Dados salvos com sucesso!');
+        alert('✅ Sucesso! Seus dados de energia foram salvos.');
       } else {
         const errorData = await response.json();
-        alert(`❌ Erro do servidor: ${errorData.error || 'Erro desconhecido'}`);
+        console.error("Erro retornado pelo servidor:", errorData);
+        alert(`❌ Erro: ${errorData.message || 'Falha ao salvar no banco.'}`);
       }
     } catch (error) {
-      console.error('Erro na requisição:', error);
-      alert('❌ Erro de conexão: Certifique-se que o servidor (backend) está rodando na porta 3333.');
+      console.error('Erro crítico de conexão:', error);
+      alert('❌ Servidor Offline! Certifique-se de que o seu Backend está rodando no terminal.');
+    } finally {
+      setLoading(false);
     }
   };
-  // -----------------------------
 
   const addComodo = () => {
-    if (!nomeComodo) return;
+    if (!nomeComodo.trim()) return;
     setComodos([...comodos, { id: Date.now(), nome: nomeComodo, icone: iconeComodoSel }]);
     setNomeComodo("");
   };
 
   const addAparelho = () => {
-    if (!novoAparelho.nome || !novoAparelho.comodo || !novoAparelho.potencia) return;
+    if (!novoAparelho.nome || !novoAparelho.comodo || !novoAparelho.potencia) {
+      alert("Preencha Nome, Watts e Cômodo!");
+      return;
+    }
     setAparelhos([...aparelhos, { ...novoAparelho, id: Date.now() }]);
     setNovoAparelho({ ...novoAparelho, nome: '', potencia: '', tempoAtivo: '', naTomada: false, tempoStandby: '12', icone: 'FaPlug' });
   };
@@ -127,18 +142,18 @@ const Gerenciamento = () => {
         </div>
         <div className="resumo-card">
           <label className="text-white-label">Imóvel Selecionado</label>
-          <div className="valor-destaque text-white" style={{fontSize: '1.4rem'}}>{local.nome || 'Nome do Imóvel'}</div>
-          <small className="text-white-dim">{local.tipo} | {local.estado} (R${tarifaAtual.toFixed(2)}/kWh)</small>
+          <div className="valor-destaque text-white" style={{fontSize: '1.4rem'}}>{local.nome || 'Pendente'}</div>
+          <small className="text-white-dim">{local.tipo} | {local.estado}</small>
         </div>
       </div>
 
       <div className="gerenciamento-grid">
-        {/* CARD 1: LOCALIZAÇÃO */}
+        {/* 1. LOCALIZAÇÃO */}
         <section className="card-gerenciamento">
           <div className="card-header"><FaHome /> <h2>1. Localização</h2></div>
           <div className="form-group">
-            <label className="label-light">Nome do Imóvel / Apartamento</label>
-            <input className="input-dark" placeholder="Ex: Apto 402" value={local.nome} onChange={e => setLocal({...local, nome: e.target.value})} />
+            <label className="label-light">Nome do Imóvel</label>
+            <input className="input-dark" placeholder="Ex: Minha Casa" value={local.nome} onChange={e => setLocal({...local, nome: e.target.value})} />
           </div>
           <div className="form-row">
             <div className="form-group">
@@ -148,7 +163,7 @@ const Gerenciamento = () => {
               </select>
             </div>
             <div className="form-group">
-              <label className="label-light">Estado (Tarifa)</label>
+              <label className="label-light">Estado</label>
               <select className="input-dark" value={local.estado} onChange={e => setLocal({...local, estado: e.target.value})}>
                 {Object.keys(tarifasPorEstado).map(uf => <option key={uf} value={uf}>{uf}</option>)}
               </select>
@@ -156,17 +171,16 @@ const Gerenciamento = () => {
           </div>
         </section>
 
-        {/* CARD 2: CÔMODOS */}
+        {/* 2. CÔMODOS */}
         <section className="card-gerenciamento">
           <div className="card-header"><FaDoorOpen /> <h2>2. Cômodos</h2></div>
-          <label className="label-light">Escolha um ícone para o cômodo:</label>
           <div className="icon-selector-row">
             {iconesComodos.map(i => (
               <button key={i.id} className={`icon-btn ${iconeComodoSel === i.id ? 'active' : ''}`} onClick={() => setIconeComodoSel(i.id)}>{i.icon}</button>
             ))}
           </div>
           <div className="input-with-button">
-            <input className="input-dark" placeholder="Nome do Cômodo (Ex: Sala)" value={nomeComodo} onChange={e => setNomeComodo(e.target.value)} />
+            <input className="input-dark" placeholder="Nome do Cômodo" value={nomeComodo} onChange={e => setNomeComodo(e.target.value)} />
             <button className="btn-square-add" onClick={addComodo}><FaPlus /></button>
           </div>
           <div className="badges-list">
@@ -174,13 +188,13 @@ const Gerenciamento = () => {
           </div>
         </section>
 
-        {/* CARD 3: APARELHOS */}
+        {/* 3. APARELHOS */}
         <section className="card-gerenciamento full-width">
           <div className="card-header"><FaTv /> <h2>3. Registro de Aparelhos</h2></div>
           
           <div className="aparelho-form-top">
             <div className="form-group">
-              <label className="label-light">Selecione o Ícone:</label>
+              <label className="label-light">Ícone:</label>
               <div className="icon-selector-row">
                 {iconesAparelhos.map(i => (
                   <button key={i.id} className={`icon-btn ${novoAparelho.icone === i.id ? 'active' : ''}`} onClick={() => setNovoAparelho({...novoAparelho, icone: i.id})}>{i.icon}</button>
@@ -189,57 +203,43 @@ const Gerenciamento = () => {
             </div>
 
             <div className="aparelho-inputs-grid">
-              <div className="form-group">
-                <label className="label-light">Nome</label>
-                <input className="input-dark" placeholder="Ex: TV LED" value={novoAparelho.nome} onChange={e => setNovoAparelho({...novoAparelho, nome: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="label-light">Watts</label>
-                <input className="input-dark" type="number" placeholder="W" value={novoAparelho.potencia} onChange={e => setNovoAparelho({...novoAparelho, potencia: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="label-light">Uso (h/dia)</label>
-                <input className="input-dark" type="number" placeholder="h" value={novoAparelho.tempoAtivo} onChange={e => setNovoAparelho({...novoAparelho, tempoAtivo: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="label-light">Cômodo</label>
-                <select className="input-dark" value={novoAparelho.comodo} onChange={e => setNovoAparelho({...novoAparelho, comodo: e.target.value})}>
-                  <option value="">Onde está?</option>
-                  {comodos.map(c => <option key={c.id} value={c.nome}>{c.nome}</option>)}
-                </select>
-              </div>
+              <input className="input-dark" placeholder="Nome do Aparelho" value={novoAparelho.nome} onChange={e => setNovoAparelho({...novoAparelho, nome: e.target.value})} />
+              <input className="input-dark" type="number" placeholder="Watts (W)" value={novoAparelho.potencia} onChange={e => setNovoAparelho({...novoAparelho, potencia: e.target.value})} />
+              <input className="input-dark" type="number" placeholder="Uso (h/dia)" value={novoAparelho.tempoAtivo} onChange={e => setNovoAparelho({...novoAparelho, tempoAtivo: e.target.value})} />
+              <select className="input-dark" value={novoAparelho.comodo} onChange={e => setNovoAparelho({...novoAparelho, comodo: e.target.value})}>
+                <option value="">Selecione o Cômodo</option>
+                {comodos.map(c => <option key={c.id} value={c.nome}>{c.nome}</option>)}
+              </select>
             </div>
 
             <div className="standby-logic-area">
-              <div className="checkbox-group">
-                <input type="checkbox" id="tomada" checked={novoAparelho.naTomada} onChange={e => setNovoAparelho({...novoAparelho, naTomada: e.target.checked})} />
-                <label htmlFor="tomada" className="text-white-dim">Fica conectado na tomada mesmo sem uso?</label>
-              </div>
+              <label className="checkbox-group">
+                <input type="checkbox" checked={novoAparelho.naTomada} onChange={e => setNovoAparelho({...novoAparelho, naTomada: e.target.checked})} />
+                <span className="text-white-dim">Fica na tomada em Standby?</span>
+              </label>
               {novoAparelho.naTomada && (
-                <div className="form-group fade-in">
-                  <label className="label-light">Horas inativo na tomada:</label>
-                  <select className="input-dark" value={novoAparelho.tempoStandby} onChange={e => setNovoAparelho({...novoAparelho, tempoStandby: e.target.value})}>
-                    <option value="6">6 Horas</option>
-                    <option value="12">12 Horas</option>
-                    <option value="18">18 Horas</option>
-                    <option value="24">Sempre (24h)</option>
-                  </select>
-                </div>
+                <select className="input-dark" value={novoAparelho.tempoStandby} onChange={e => setNovoAparelho({...novoAparelho, tempoStandby: e.target.value})}>
+                  <option value="6">6h Standby</option>
+                  <option value="12">12h Standby</option>
+                  <option value="18">18h Standby</option>
+                  <option value="24">24h Standby</option>
+                </select>
               )}
             </div>
-            <button className="btn-primary" onClick={addAparelho}>+ Adicionar Aparelho</button>
+            <button className="btn-primary" onClick={addAparelho}>+ Adicionar à Lista</button>
           </div>
 
+          {/* TABELA */}
           <div className="table-container">
             <table className="modern-table">
               <thead>
                 <tr>
                   <th>Aparelho</th>
                   <th>Cômodo</th>
-                  <th>Ativo</th>
+                  <th>Consumo</th>
                   <th>Standby</th>
-                  <th>Custo Mensal</th>
-                  <th>Ação</th>
+                  <th>Custo/Mês</th>
+                  <th>Remover</th>
                 </tr>
               </thead>
               <tbody>
@@ -251,8 +251,8 @@ const Gerenciamento = () => {
                     <tr key={a.id}>
                       <td className="td-with-icon">{renderIcon(a.icone, iconesAparelhos)} {a.nome}</td>
                       <td>{a.comodo}</td>
-                      <td>{a.potencia}W / {a.tempoAtivo}h</td>
-                      <td style={{color: a.naTomada ? '#ff6b6b' : '#666'}}>{a.naTomada ? `${pStandby.toFixed(1)}W (${a.tempoStandby}h)` : 'Off'}</td>
+                      <td>{a.potencia}W ({a.tempoAtivo}h)</td>
+                      <td style={{color: a.naTomada ? '#ffbc00' : '#555'}}>{a.naTomada ? `${pStandby.toFixed(1)}W` : 'Não'}</td>
                       <td className="text-yellow">{custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
                       <td><button className="btn-del-icon" onClick={() => setAparelhos(aparelhos.filter(x => x.id !== a.id))}><FaTrash /></button></td>
                     </tr>
@@ -262,10 +262,13 @@ const Gerenciamento = () => {
             </table>
           </div>
 
-          {/* BOTÃO DE SALVAR FINALIZADO */}
-          <div className="save-action-area" style={{ marginTop: '30px', textAlign: 'right' }}>
-            <button className="btn-primary" onClick={salvarNoBackend} style={{ background: '#27ae60', padding: '15px 35px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-              <FaSave />  Salvar no Sistema
+          <div className="save-action-area">
+            <button 
+              className="btn-save-final" 
+              onClick={salvarNoBackend} 
+              disabled={loading}
+            >
+              {loading ? "Salvando..." : <><FaSave /> Salvar configurações</>}
             </button>
           </div>
         </section>

@@ -2,32 +2,32 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext"; 
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importando os ícones
+import { FaEye, FaEyeSlash } from "react-icons/fa"; 
 import './Login.css';
 import '../../App.css';
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/esconder senha
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useContext(AuthContext); 
 
-  // Função de validação local
+  // Validação local rigorosa
   const validateForm = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // Pelo menos 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial
+    // A senha deve bater com o que você definiu no cadastro
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
     if (!emailRegex.test(email)) {
       setError("Por favor, insira um e-mail válido.");
       return false;
     }
-    if (!passwordRegex.test(senha)) {
-      setError("A senha deve ter no mínimo 8 caracteres, incluindo uma letra maiúscula, um número e um caractere especial.");
+    if (senha.length < 8) {
+      setError("A senha deve ter no mínimo 8 caracteres.");
       return false;
     }
     return true;
@@ -37,28 +37,34 @@ const Login = () => {
     e.preventDefault();
     setError(null);
 
-    if (!validateForm()) return; // Valida antes de enviar ao backend
+    if (!validateForm()) return;
 
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:3333/api/auth/login", {
+      // Usamos 127.0.0.1 para garantir que o Windows não se perca no DNS do localhost
+      const response = await axios.post("http://127.0.0.1:3333/api/auth/login", {
         email,
         senha,
       });
 
+      // Salvando os dados no Contexto e no LocalStorage
+      const { token, user } = response.data;
+      
       login({
-        token: response.data.token,
-        name: response.data.user?.nome || "Usuário", 
-        email: email
+        token: token,
+        name: user?.nome || "Usuário", 
+        email: user?.email || email
       });
 
-      localStorage.setItem('authToken', response.data.token);
-      alert("Login realizado com sucesso!");
+      localStorage.setItem('authToken', token);
+      
+      alert("✅ Bem-vindo ao EnergiT!");
       navigate("/"); 
       
     } catch (err: any) {
-      const message = err.response?.data?.message || "Credenciais inválidas ou erro no servidor.";
+      console.error("Erro no login:", err);
+      const message = err.response?.data?.message || "E-mail ou senha incorretos.";
       setError(message);
     } finally {
       setLoading(false);
@@ -69,6 +75,7 @@ const Login = () => {
     <div className="login-page-wrapper">
       <div className="login-container">
         <div className="login-image">
+          {/* Garanta que este caminho de imagem está correto na sua pasta public */}
           <img src="/imgs/Sun%20energy-bro.png" alt="Sun energy" />
         </div>
 
@@ -85,6 +92,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
 
@@ -92,7 +100,7 @@ const Login = () => {
               <label>Senha</label>
               <div className="password-input-container" style={{ position: 'relative' }}>
                 <input
-                  type={showPassword ? "text" : "password"} // Alterna o tipo
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
@@ -104,19 +112,33 @@ const Login = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute',
-                    right: '10px',
+                    right: '15px',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     cursor: 'pointer',
-                    color: '#666'
+                    color: '#666',
+                    display: 'flex',
+                    alignItems: 'center'
                   }}
                 >
-                  {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                  {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                 </span>
               </div>
             </div>
 
-            {error && <div className="error-message" style={{ color: 'red', fontSize: '14px', marginBottom: '10px' }}>{error}</div>}
+            {error && (
+              <div className="error-message" style={{ 
+                color: '#ff4d4d', 
+                fontSize: '13px', 
+                marginBottom: '15px',
+                backgroundColor: 'rgba(255, 77, 77, 0.1)',
+                padding: '8px',
+                borderRadius: '4px',
+                textAlign: 'center'
+              }}>
+                {error}
+              </div>
+            )}
 
             <button className="btn-login" type="submit" disabled={loading}>
               {loading ? "Autenticando..." : "Entrar"}
@@ -124,7 +146,12 @@ const Login = () => {
           </form>
 
           <p className="signup-link">
-            Não tem uma conta? <span onClick={() => navigate("/signup")}>Criar conta</span>
+            Não tem uma conta? <span 
+              onClick={() => navigate("/signup")} 
+              style={{ cursor: 'pointer', fontWeight: 'bold', color: '#f1c40f' }}
+            >
+              Criar conta
+            </span>
           </p>
         </div>
       </div>

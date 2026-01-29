@@ -1,39 +1,67 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import '../Login/Login.css'; // Usaremos o mesmo CSS para manter a consistência
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importando os ícones
+import '../Login/Login.css'; 
 import '../../App.css';
+
 const Signup = () => {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Estado para o "olhinho"
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
+  // Função de Validação
+  const validateForm = () => {
+    // 1. Validação de Email (Regex padrão: texto + @ + texto + . + texto)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Por favor, insira um e-mail válido (ex: seu@email.com).");
+      return false;
+    }
+
+    // 2. Validação de Senha Forte
+    // Mínimo 8 caracteres, pelo menos uma letra maiúscula, uma minúscula e um número
+    const senhaRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!senhaRegex.test(senha)) {
+      setError("A senha deve ter pelo menos 8 caracteres, incluir uma letra maiúscula, uma minúscula e um número.");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
+    if (!validateForm()) return;
+
+    setLoading(true);
     try {
-      await axios.post("http://localhost:3333/api/auth/register", {
+      await axios.post("http://127.0.0.1:3333/api/auth/register", {
         nome,
         email,
         senha,
       });
-      alert("Usuário cadastrado com sucesso!");
-      navigate("/login"); // Redireciona para o login após cadastrar
+
+      alert("✅ Usuário cadastrado com sucesso!");
+      navigate("/login"); 
     } catch (err: any) {
-      setError("Erro ao cadastrar o usuário. Tente novamente.");
+      console.error("Erro no cadastro:", err);
+      const message = err.response?.data?.message || "Erro ao conectar com o servidor.";
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page-wrapper signup-mode"> {/* signup-mode aplica o visual 'apagado' */}
+    <div className="login-page-wrapper signup-mode">
       <div className="login-container">
         <div className="login-image">
           <img src="/imgs/Sun%20energy-bro.png" alt="Energy illustration" />
@@ -41,7 +69,7 @@ const Signup = () => {
 
         <div className="login-form-side">
           <h2>Crie sua conta no Ener<span>giT</span></h2>
-          <p>Comece a monitorar sua economia hoje mesmo.</p>
+          <p>Sua jornada de economia começa aqui.</p>
 
           <form onSubmit={handleSubmit}>
             <div className="input-group">
@@ -66,21 +94,43 @@ const Signup = () => {
               />
             </div>
 
-            <div className="input-group">
+            <div className="input-group password-field">
               <label>Senha</label>
-              <input
-                type="password"
-                placeholder="Mínimo 6 caracteres"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="8+ caracteres, A-z, 0-9"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                  style={{ width: '100%', paddingRight: '40px' }}
+                />
+                <span 
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    cursor: 'pointer',
+                    color: '#666',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
             </div>
 
-            {error && <div className="error-message">{error}</div>}
+            {error && (
+              <div className="error-message-box">
+                {error}
+              </div>
+            )}
 
             <button className="btn-login" type="submit" disabled={loading}>
-              {loading ? "Processando..." : "Cadastrar"}
+              {loading ? "Processando..." : "Finalizar Cadastro"}
             </button>
           </form>
 
